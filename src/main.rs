@@ -15,7 +15,7 @@ use file_uploader::nft_storage;
 
 #[get("/")]
 fn index() -> &'static str {
-    "hello"
+    "Dot marketplace nft upload server. Send a file named 'filesent' to /upload-file"
 }
 
 #[post("/upload-file", data = "<form_data>")]

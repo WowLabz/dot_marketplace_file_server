@@ -1,16 +1,16 @@
-use reqwest;
-use crate::utils::data_parser::MultipartHandler;
-use dotenv;
+use crate::service::file_service::MultipartHandler;
+
+
 pub struct Client {
     pub http_client: reqwest::Client,
-    pub request_url: Option<String>
+    pub request_url: Option<String>,
 }
 
 impl Default for Client {
     fn default() -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            request_url: None
+            request_url: None,
         }
     }
 }
@@ -24,8 +24,8 @@ impl Client {
         self.request_url = Some(server_url);
         self
     }
+
     pub fn url(cid: String) -> String {
-        // https://ipfs.io/ipfs/cid
         format!("https://ipfs.io/ipfs/{}", Self::rem_first_and_last(&cid))
     }
 
@@ -38,7 +38,7 @@ impl Client {
 
     pub async fn upload_nft(&self, multipart: MultipartHandler) -> Result<String, reqwest::Error> {
         dotenv::dotenv().ok();
-        let auth_token = std::env::var("NFT_STORAGE_AUTH").expect("NFT_STORAGE_AUTH not set");
+        let auth_token =  std::env::var("NFT_STORAGE_AUTH").expect("NFT_STORAGE_AUTH not set");
 
         let req = self
             .http_client
@@ -52,7 +52,7 @@ impl Client {
         println!("cid: {:#?}", res);
         let cid: String = res["value"]["cid"].to_string();
         let view_nft_url = Self::url(cid);
-        println!("view_nft_url: {}", view_nft_url);
+        // println!("view_nft_url: {}", view_nft_url);
 
         Ok(view_nft_url)
     }

@@ -12,8 +12,7 @@ pub async fn upload_file(
     content_type: &ContentType,
     form_data: Data<'_>
 )-> Result<status::Custom<Json<Response>>, status::Custom<Json<Response>>> {
-    let multipart_result = MultipartHandler
-                                                        ::from(content_type, form_data).await;
+    let multipart_result = MultipartHandler::from(content_type, form_data).await;
     let multipart = match multipart_result {
         Ok(data) => data,
         Err(_) => {

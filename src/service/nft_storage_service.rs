@@ -37,13 +37,10 @@ impl Client {
     }
 
     pub async fn upload_nft(&self, multipart: MultipartHandler) -> Result<String, reqwest::Error> {
-<<<<<<< HEAD:src/file_uploader/nft_storage.rs
         // dotenv::dotenv().ok();
         let auth_token =  String::from("YOUR_ACCESS_TOKEN_HERE"); //std::env::var("NFT_STORAGE_AUTH").expect("NFT_STORAGE_AUTH not set");
-=======
         dotenv::dotenv().ok();
         let auth_token =  std::env::var("NFT_STORAGE_AUTH").expect("NFT_STORAGE_AUTH not set");
->>>>>>> version/1.00:src/service/nft_storage_service.rs
 
         let req = self
             .http_client

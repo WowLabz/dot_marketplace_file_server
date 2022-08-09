@@ -1,13 +1,13 @@
 use rocket::serde::Serialize;
 
 #[derive(Serialize)]
-pub struct Response {
+pub struct ResponseSent {
     pub success: bool,
     pub message: Option<String>,
     pub error: Option<String>
 }
 
-impl Response {
+impl ResponseSent {
     pub fn successful(success_message: &str) -> Self {
         Self{
             success: true,

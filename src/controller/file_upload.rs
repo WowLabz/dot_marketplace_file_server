@@ -5,18 +5,18 @@ use rocket::serde::json::Json;
 
 
 use crate::service::{file_service::MultipartHandler, nft_storage_service};
-use crate::handler::{response::Response};
+use crate::handler::{response::ResponseSent};
 use crate::config::nft_storage_config::NftStorageConfig;
 
 pub async fn upload_file(
     content_type: &ContentType,
     form_data: Data<'_>
-)-> Result<status::Custom<Json<Response>>, status::Custom<Json<Response>>> {
+)-> Result<status::Custom<Json<ResponseSent>>, status::Custom<Json<ResponseSent>>> {
     let multipart_result = MultipartHandler::from(content_type, form_data).await;
     let multipart = match multipart_result {
         Ok(data) => data,
         Err(_) => {
-            let response = Response::unsuccessful("file upload failed");
+            let response = ResponseSent::unsuccessful("file upload failed");
             return Err(status::Custom(Status::BadRequest, Json(response)));
         }
     };
@@ -29,12 +29,12 @@ pub async fn upload_file(
     let file_ipfs_url = match nft_service_res {
         Ok(url) => url,
         Err(_) => {
-            let response = Response::unsuccessful("file upload error");
+            let response = ResponseSent::unsuccessful("file upload error");
             return Err(status::Custom(Status::InternalServerError, Json(response)));
         }
     };
-    let message = format!("File upload success at ipfs url : {}",file_ipfs_url);
+    let message = format!("{}",file_ipfs_url);
     let message = message.as_str();
-    let response = Response::successful(message);
+    let response = ResponseSent::successful(message);
     Ok(status::Custom(Status::Accepted, Json(response)))
 }

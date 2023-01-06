@@ -3,9 +3,18 @@
 ### Features
 1. Upload File to IPFS using NFT Storage API
 
-# Running the server
+# Build server
+```bash
+cargo build --release
+```
+
+# Run Server
 ```bash
 ./target/release/dot_marketplace_file_server
+```
+or 
+```bash
+cargo  run
 ```
 
 # Tests

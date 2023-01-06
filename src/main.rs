@@ -97,7 +97,7 @@ mod test{
     }
 
     #[rocket::async_test]
-    async fn correct_error_when_uploading_file_with_wrong_data() {
+    async fn correct_error_when_uploading_file_without_body() {
         let content_type = "multipart/form-data; boundary=X-BOUNDARY"
             .parse::<ContentType>()
             .unwrap();
@@ -111,6 +111,35 @@ mod test{
             .header(content_type.clone())
             .dispatch()
             .await;
-        assert_eq!(upload_file.status().code, 400);
+        assert_eq!(upload_file.status(), Status::BadRequest);
+    }
+
+    #[rocket::async_test]
+    async fn correct_error_when_uploading_file_with_wrong_file_name() {
+        let content_type = "multipart/form-data; boundary=X-BOUNDARY"
+            .parse::<ContentType>()
+            .unwrap();
+        let client = Client::tracked(rocket())
+        .await
+        .expect("valid rocket instance");
+
+
+        let multipart_body = &[
+            "--X-BOUNDARY",
+            r#"Content-Disposition: form-data; name="wrong-name"; filename="foo.txt""#,
+            "Content-Type: text/plain",
+            "",
+            "hi there",
+            "--X-BOUNDARY--",
+            "",
+        ].join("\r\n");
+
+        let upload_file = client
+            .post("/upload-file")
+            .header(content_type.clone())
+            .body(multipart_body)
+            .dispatch()
+            .await;
+        assert_eq!(upload_file.status(), Status::BadRequest);
     }
 }

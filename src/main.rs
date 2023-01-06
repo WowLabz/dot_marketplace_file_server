@@ -60,3 +60,86 @@ fn rocket() -> _ {
             .mount("/", routes![index, upload_file])
             .attach(CORS)
 }
+
+#[cfg(test)]
+mod test{
+    use super::rocket;
+    use rocket::http::{ContentType, Header, Status};
+    use rocket::local::asynchronous::Client;
+    
+    #[rocket::async_test]
+    async fn it_works_for_uploading_file() {
+        let content_type = "multipart/form-data; boundary=X-BOUNDARY"
+            .parse::<ContentType>()
+            .unwrap();
+        let client = Client::tracked(rocket())
+        .await
+        .expect("valid rocket instance");
+
+
+        let multipart_body = &[
+            "--X-BOUNDARY",
+            r#"Content-Disposition: form-data; name="filesent"; filename="foo.txt""#,
+            "Content-Type: text/plain",
+            "",
+            "hi there",
+            "--X-BOUNDARY--",
+            "",
+        ].join("\r\n");
+
+        let upload_file = client
+            .post("/upload-file")
+            .header(content_type.clone())
+            .body(multipart_body)
+            .dispatch()
+            .await;
+        assert_eq!(upload_file.status(), Status::Accepted);
+    }
+
+    #[rocket::async_test]
+    async fn correct_error_when_uploading_file_without_body() {
+        let content_type = "multipart/form-data; boundary=X-BOUNDARY"
+            .parse::<ContentType>()
+            .unwrap();
+        let client = Client::tracked(rocket())
+        .await
+        .expect("valid rocket instance");
+
+
+        let upload_file = client
+            .post("/upload-file")
+            .header(content_type.clone())
+            .dispatch()
+            .await;
+        assert_eq!(upload_file.status(), Status::BadRequest);
+    }
+
+    #[rocket::async_test]
+    async fn correct_error_when_uploading_file_with_wrong_file_name() {
+        let content_type = "multipart/form-data; boundary=X-BOUNDARY"
+            .parse::<ContentType>()
+            .unwrap();
+        let client = Client::tracked(rocket())
+        .await
+        .expect("valid rocket instance");
+
+
+        let multipart_body = &[
+            "--X-BOUNDARY",
+            r#"Content-Disposition: form-data; name="wrong-name"; filename="foo.txt""#,
+            "Content-Type: text/plain",
+            "",
+            "hi there",
+            "--X-BOUNDARY--",
+            "",
+        ].join("\r\n");
+
+        let upload_file = client
+            .post("/upload-file")
+            .header(content_type.clone())
+            .body(multipart_body)
+            .dispatch()
+            .await;
+        assert_eq!(upload_file.status(), Status::BadRequest);
+    }
+}
